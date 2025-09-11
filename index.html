@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JRD Fire Safety Solutions - Professional Fire Extinguisher Services</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Admin Dashboard Section (Hidden by default) -->
+    <div id="admin-dashboard" class="admin-dashboard" style="display: none;">
+        <header class="admin-header">
+            <nav class="admin-nav">
+                <div class="admin-logo">
+                    <i class="fas fa-fire-extinguisher"></i>
+                    <span>JRD Fire Safety - Admin</span>
+                </div>
+                <div class="admin-actions">
+                    <button class="btn btn-secondary" onclick="showMainSite()">View Website</button>
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <div class="dashboard-container">
+            <h1 class="dashboard-title">Gallery Management Dashboard</h1>
+            
+            <div class="message" id="messageBox"></div>
+
+            <div class="section-tabs">
+                <button class="tab-btn active" onclick="showSection('gallery')">Gallery Management</button>
+                <button class="tab-btn" onclick="showSection('location')">Location Management</button>
+            </div>
+
+            <!-- Gallery Upload Section -->
+            <div id="gallery-section" class="upload-section">
+                <h2 class="upload-title">Add New Installation Image</h2>
+                <form id="uploadForm" class="upload-form">
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label for="imageTitle">Installation Title</label>
+                            <input type="text" id="imageTitle" name="title" required placeholder="e.g., Corporate Office Complex">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="imageLocation">Location/Info</label>
+                            <input type="text" id="imageLocation" name="location" required placeholder="e.g., 50+ ABC Extinguishers Installed">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="imageDescription">Description (Optional)</label>
+                            <textarea id="imageDescription" name="description" rows="3" placeholder="Additional details about the installation..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-column">
+                        <div class="form-group">
+                            <label>Upload Image</label>
+                            <div class="file-upload">
+                                <input type="file" id="imageFile" name="image" accept="image/*" required>
+                                <label for="imageFile" class="file-upload-label" id="fileUploadLabel">
+                                    <div>
+                                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #e74c3c; margin-bottom: 1rem;"></i>
+                                        <p><strong>Click to upload</strong> or drag and drop</p>
+                                        <p style="color: #666; font-size: 0.9rem;">PNG, JPG, GIF up to 10MB</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="upload-btn" id="uploadBtn">
+                        <i class="fas fa-upload"></i> Upload Image
+                    </button>
+                </form>
+            </div>
+
+            <!-- Gallery Management -->
+            <div class="gallery-management">
+                <h2 class="upload-title">Manage Gallery Images</h2>
+                <div class="gallery-grid" id="galleryGrid">
+                    <!-- Gallery items will be loaded here -->
+                </div>
+            </div>
+            
+            <!-- Location Upload Section -->
+            <div id="location-section" class="upload-section" style="display: none;">
+                <h2>Upload Location Image</h2>
+                <form id="locationUploadForm" class="upload-form">
+                    <div class="form-group">
+                        <label for="locationImage">Location Image:</label>
+                        <input type="file" id="locationImage" accept="image/*" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="locationTitle">Branch Name:</label>
+                        <input type="text" id="locationTitle" placeholder="e.g., Main Branch" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="locationAddress">Address:</label>
+                        <input type="text" id="locationAddress" placeholder="e.g., 123 Fire Safety Street, City Center" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="locationDescription">Description:</label>
+                        <textarea id="locationDescription" placeholder="Brief description of this location" rows="3"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="upload-btn">Upload Location</button>
+                </form>
+            </div>
+            
+            <!-- Location Management -->
+            <div class="location-management" style="display: none;">
+                <h2>Current Locations</h2>
+                <div id="currentLocations" class="current-images">
+                    <!-- Locations will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Website Content -->
+    <div id="main-website">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-fire-extinguisher"></i>
+                <span>JRD Fire Safety</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#products" class="nav-link">Products</a></li>
+                <li><a href="#gallery" class="nav-link">Gallery</a></li>
+                <li><a href="#location" class="nav-link">Our Location</a></li>
+                <li><a href="#pricing" class="nav-link">Pricing</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li><a href="#" onclick="showAdminDashboard()" class="nav-link admin-link" style="color: #e74c3c; font-weight: 600;"><i class="fas fa-cog"></i> Admin</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">🔥 JRD Fire Equipment Solutions</h1>
+                <p class="hero-subtitle">Your trusted partner in fire safety - Premium extinguishers, emergency
+                    equipment & professional installation services</p>
+                <div class="hero-buttons">
+                    <a href="#products" class="btn btn-primary">View Products</a>
+                    <a href="#contact" class="btn btn-secondary">Get Quote</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="fire-extinguisher-icon">
+                    <i class="fas fa-fire-extinguisher"></i>
+                </div>
+            </div>
+        </div>
+        <div class="hero-stats">
+            <div class="stat">
+                <h3>500+</h3>
+                <p>🏢 Businesses Protected</p>
+            </div>
+            <div class="stat">
+                <h3>2000+</h3>
+                <p>🧯 Extinguishers Installed</p>
+            </div>
+            <div class="stat">
+                <h3>15+</h3>
+                <p>🏆 Years Experience</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Fire Safety Installations Gallery -->
+    <section id="gallery" class="gallery-carousel">
+        <div class="container">
+            <h2 class="section-title">Recent Fire Safety Installations</h2>
+            <div class="carousel-container">
+                <div class="carousel-wrapper">
+                    <div class="carousel-track" id="carouselTrack">
+                        <!-- Images will be loaded dynamically from Supabase -->
+                        <div class="carousel-slide active">
+                            <div class="slide-image">
+                                <div class="placeholder-image">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                            </div>
+                            <div class="slide-content">
+                                <h3>Corporate Office Complex</h3>
+                                <p>50+ ABC Extinguishers Installed</p>
+                            </div>
+                        </div>
+                        <div class="carousel-slide">
+                            <div class="slide-image">
+                                <div class="placeholder-image">
+                                    <i class="fas fa-industry"></i>
+                                </div>
+                            </div>
+                            <div class="slide-content">
+                                <h3>Manufacturing Plant</h3>
+                                <p>Complete Fire Suppression System</p>
+                            </div>
+                        </div>
+                        <div class="carousel-slide">
+                            <div class="slide-image">
+                                <div class="placeholder-image">
+                                    <i class="fas fa-warehouse"></i>
+                                </div>
+                            </div>
+                            <div class="slide-content">
+                                <h3>Logistics Warehouse</h3>
+                                <p>High-Capacity Foam Systems</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="carousel-btn carousel-btn-prev" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="carousel-btn carousel-btn-next" id="nextBtn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <div class="carousel-indicators" id="carouselIndicators">
+                    <button class="indicator active" data-slide="0"></button>
+                    <button class="indicator" data-slide="1"></button>
+                    <button class="indicator" data-slide="2"></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Location Section -->
+    <section id="location" class="section">
+        <div class="container">
+            <h2 class="section-title">Our Location</h2>
+            <p class="section-subtitle">Visit our branches and see our facilities</p>
+            
+            <div class="location-grid" id="locationGrid">
+                <!-- Placeholder locations - will be replaced by Supabase data -->
+                <div class="location-card">
+                    <div class="location-image">
+                        <img src="https://via.placeholder.com/600x400/ff6b35/ffffff?text=Main+Branch" alt="Main Branch" loading="lazy">
+                    </div>
+                    <div class="location-info">
+                        <h3>Main Branch</h3>
+                        <p>123 Fire Safety Street, City Center</p>
+                        <p class="location-description">Our main headquarters with full showroom and service center</p>
+                    </div>
+                </div>
+                
+                <div class="location-card">
+                    <div class="location-image">
+                        <img src="https://via.placeholder.com/600x400/ff6b35/ffffff?text=Branch+2" alt="Branch 2" loading="lazy">
+                    </div>
+                    <div class="location-info">
+                        <h3>North Branch</h3>
+                        <p>456 Safety Avenue, North District</p>
+                        <p class="location-description">Specialized in commercial fire safety solutions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="section">
+        <div class="container">
+            <h2 class="section-title">🔥 Fire Safety Equipment & Services</h2>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-icon">
+                        <i class="fas fa-fire-extinguisher"></i>
+                    </div>
+                    <h3>🧯 ABC Dry Powder Extinguishers</h3>
+                    <p>Multi-purpose fire suppression for Class A, B, and C fires - ideal for offices, warehouses, and
+                        industrial facilities</p>
+                    <div class="product-features">
+                        <span>🔥 1kg - 25kg Capacities Available</span>
+                        <span>🛡️ 5 Year Manufacturer Warranty</span>
+                        <span>✅ CE & BSI Certified</span>
+                        <span>🚚 Free Installation Service</span>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <h3>💧 Water & Foam Extinguishers</h3>
+                    <p>Specialized for Class A fires - wood, paper, textiles, and organic materials in commercial spaces
+                    </p>
+                    <div class="product-features">
+                        <span>💧 6L - 50L Capacity Range</span>
+                        <span>🌱 Environmentally Safe Formula</span>
+                        <span>⚡ Quick Fire Suppression</span>
+                        <span>🔧 Professional Maintenance Included</span>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>⚡ CO2 & Electrical Safety</h3>
+                    <p>Clean agent extinguishers for electrical equipment, server rooms, and sensitive electronic
+                        environments</p>
+                    <div class="product-features">
+                        <span>⚡ 2kg - 45kg CO2 Units</span>
+                        <span>🖥️ Safe for Electronics</span>
+                        <span>🧹 No Residue or Cleanup</span>
+                        <span>🔒 Tamper-Proof Seals</span>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>🚨 Fire Safety Systems</h3>
+                    <p>Complete fire detection and suppression systems for comprehensive building protection</p>
+                    <div class="product-features">
+                        <span>🚨 Smoke & Heat Detectors</span>
+                        <span>🔔 Emergency Alarm Systems</span>
+                        <span>🚪 Fire Exit Signage</span>
+                        <span>📋 Safety Compliance Audits</span>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-icon">
+                        <i class="fas fa-hard-hat"></i>
+                    </div>
+                    <h3>👷 Safety Training & Certification</h3>
+                    <p>Professional fire safety training programs for employees and safety officers</p>
+                    <div class="product-features">
+                        <span>📚 Fire Warden Training</span>
+                        <span>🎯 Hands-on Extinguisher Use</span>
+                        <span>📜 Certified Training Programs</span>
+                        <span>👥 Group & Individual Sessions</span>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>🔧 Maintenance & Inspection</h3>
+                    <p>Regular servicing and compliance checks to ensure your fire equipment is always ready</p>
+                    <div class="product-features">
+                        <span>📅 Annual Safety Inspections</span>
+                        <span>🔄 Equipment Refurbishment</span>
+                        <span>📋 Compliance Certificates</span>
+                        <span>⏰ 24/7 Emergency Callout</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="pricing">
+            <div class="container">
+                <h2 class="section-title">🔥 Fire Safety Equipment Pricing</h2>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h3>🏠 Basic Fire Protection</h3>
+                            <div class="price">$65</div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li>🧯 2kg ABC Dry Powder Extinguisher</li>
+                            <li>🔧 Wall Mount Bracket & Hardware</li>
+                            <li>📋 Basic Installation Service</li>
+                            <li>🛡️ 2 Year Equipment Warranty</li>
+                            <li>📞 Phone Support</li>
+                        </ul>
+                        <button class="btn btn-primary" onclick="openContactPopup()">🛒 Order Now</button>
+                    </div>
+                    <div class="pricing-card featured">
+                        <div class="pricing-badge">🔥 Most Popular</div>
+                        <div class="pricing-header">
+                            <h3>🏢 Business Fire Safety</h3>
+                            <div class="price">$145</div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li>🧯 6kg ABC Multi-Purpose Extinguisher</li>
+                            <li>🔒 Anti-Theft Security Bracket</li>
+                            <li>👷 Professional Installation & Setup</li>
+                            <li>🛡️ 5 Year Full Warranty Coverage</li>
+                            <li>📅 Annual Safety Inspection</li>
+                            <li>📋 Compliance Certificate</li>
+                            <li>⚡ Priority Emergency Support</li>
+                        </ul>
+                        <button class="btn btn-primary">🛒 Order Now</button>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h3>🏭 Industrial Fire System</h3>
+                            <div class="price">$285</div>
+                        </div>
+                        <ul class="pricing-features">
+                            <li>🧯 25kg High-Capacity ABC Unit</li>
+                            <li>🚚 Heavy-Duty Mobile Trolley</li>
+                            <li>🔧 Expert Installation & Training</li>
+                            <li>🛡️ 7 Year Extended Warranty</li>
+                            <li>📅 Bi-Annual Maintenance Visits</li>
+                            <li>📋 Full Compliance Documentation</li>
+                            <li>🚨 24/7 Emergency Callout Service</li>
+                            <li>👨‍🏫 Staff Fire Safety Training</li>
+                        </ul>
+                        <button class="btn btn-primary">🛒 Order Now</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact">
+            <div class="container">
+                <h2 class="section-title">Get In Touch</h2>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h4>🏢 JRD Fire Equipment HQ</h4>
+                                <p>🔥 123 Fire Safety Boulevard<br>Emergency Services District<br>Safety City, SC
+                                    12345<br>🇺🇸 United States</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h4>📞 Emergency & Sales Hotline</h4>
+                                <p>🚨 Emergency: +1 (555) FIRE-911<br>📞 Sales: +1 (555) 123-FIRE<br>📱 Mobile: +1 (555)
+                                    987-6543</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h4>📧 Contact Information</h4>
+                                <p>🔥 info@jrdfiresafety.com<br>🚨 emergency@jrdfiresafety.com<br>💼
+                                    sales@jrdfiresafety.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h4>🕒 Service Hours</h4>
+                                <p>🔥 <strong>Emergency Services: 24/7/365</strong><br>📞 Sales & Support:<br>Mon - Fri:
+                                    7:00 AM - 7:00 PM<br>Sat: 8:00 AM - 5:00 PM<br>Sun: 10:00 AM - 4:00 PM</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact-form">
+                        <form>
+                            <div class="form-group">
+                                <input type="text" placeholder="Your Name" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" placeholder="Your Email" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="tel" placeholder="Your Phone">
+                            </div>
+                            <div class="form-group">
+                                <select required>
+                                    <option value="">🔥 Select Fire Safety Service</option>
+                                    <option value="purchase">🧯 Purchase Fire Extinguishers</option>
+                                    <option value="installation">🔧 Professional Installation Service</option>
+                                    <option value="maintenance">📋 Maintenance & Annual Inspection</option>
+                                    <option value="consultation">👨‍🏫 Fire Safety Training & Consultation</option>
+                                    <option value="emergency">🚨 Emergency Fire Equipment Repair</option>
+                                    <option value="compliance">📜 Fire Safety Compliance Audit</option>
+                                    <option value="quote">💰 Custom System Quote</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <textarea placeholder="Your Message" rows="5"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <div class="footer-logo">
+                            <i class="fas fa-fire-extinguisher"></i>
+                            <span>JRD Fire Safety</span>
+                        </div>
+                        <p>Your trusted partner in fire safety solutions. Protecting lives and property since 2010.</p>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="#home">Home</a></li>
+                            <li><a href="#products">Products</a></li>
+                            <li><a href="#gallery">Gallery</a></li>
+                            <li><a href="#pricing">Pricing</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Services</h4>
+                        <ul>
+                            <li><a href="#">Fire Extinguisher Sales</a></li>
+                            <li><a href="#">Installation Services</a></li>
+                            <li><a href="#">Maintenance & Inspection</a></li>
+                            <li><a href="#">Safety Training</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Follow Us</h4>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-facebook"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 JRD Fire Safety Solutions. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+    <!-- Contact Popup Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeContactPopup()">&times;</span>
+            <h2>Contact Us to Order</h2>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <h3>Visit Our Location</h3>
+                        <p>123 Fire Safety Street, City Center</p>
+                        <p>Open Monday - Saturday, 8:00 AM - 6:00 PM</p>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <h3>Call Us</h3>
+                        <p><a href="tel:+1234567890">+1 (234) 567-890</a></p>
+                        <p>Available 24/7 for emergencies</p>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <i class="fab fa-facebook"></i>
+                    <div>
+                        <h3>Message Us on Facebook</h3>
+                        <p><a href="https://www.facebook.com/profile.php?id=61578063793868" target="_blank">Fire Safety Solutions</a></p>
+                        <p>Quick response during business hours</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="popup-actions">
+                <button class="popup-btn" onclick="window.open('tel:+1234567890')">Call Now</button>
+                <button class="popup-btn" onclick="window.open('https://facebook.com/yourpage', '_blank')">Message on Facebook</button>
+            </div>
+        </div>
+    </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        </div> <!-- End of main-website -->
+
+    <script src="supabase-config.js"></script>
+    <script src="script.js"></script>
+    
+    <!-- Admin Dashboard JavaScript -->
+    <script>
+        // Client-side routing
+        function handleRouting() {
+            const path = window.location.pathname;
+            const hash = window.location.hash;
+            
+            if (path.endsWith('/admin') || hash === '#admin') {
+                showAdminDashboard();
+            } else {
+                showMainSite();
+            }
+        }
+        
+        function showAdminDashboard() {
+            // Check if user is logged in (you can implement this check)
+            document.getElementById('admin-dashboard').style.display = 'block';
+            document.getElementById('main-website').style.display = 'none';
+            
+            // Update URL without page reload
+            if (!window.location.pathname.endsWith('/admin') && window.location.hash !== '#admin') {
+                history.pushState(null, '', window.location.pathname + '#admin');
+            }
+            
+            // Initialize admin dashboard if needed
+            if (typeof initializeAdminDashboard === 'function') {
+                initializeAdminDashboard();
+            }
+        }
+        
+        function showMainSite() {
+            document.getElementById('admin-dashboard').style.display = 'none';
+            document.getElementById('main-website').style.display = 'block';
+            
+            // Update URL without page reload
+            if (window.location.hash === '#admin') {
+                history.pushState(null, '', window.location.pathname);
+            }
+        }
+        
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', handleRouting);
+        
+        // Handle initial page load
+        document.addEventListener('DOMContentLoaded', function() {
+            handleRouting();
+        });
+        
+        // Admin Dashboard Functions
+        function showSection(section) {
+            // Hide all sections
+            document.getElementById('gallery-section').style.display = 'none';
+            document.getElementById('location-section').style.display = 'none';
+            document.querySelector('.gallery-management').style.display = 'none';
+            document.querySelector('.location-management').style.display = 'none';
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (section === 'gallery') {
+                document.getElementById('gallery-section').style.display = 'block';
+                document.querySelector('.gallery-management').style.display = 'block';
+                document.querySelector('.tab-btn').classList.add('active');
+                loadGalleryImages();
+            } else if (section === 'location') {
+                document.getElementById('location-section').style.display = 'block';
+                document.querySelector('.location-management').style.display = 'block';
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                loadCurrentLocations();
+            }
+        }
+        
+        function initializeAdmin() {
+            showSection('gallery');
+            loadGalleryImages();
+            loadCurrentLocations();
+            setupFileUpload();
+            
+            // Setup form handlers
+            const galleryForm = document.getElementById('uploadForm');
+            const locationForm = document.getElementById('locationUploadForm');
+            
+            if (galleryForm) {
+                galleryForm.addEventListener('submit', handleGallerySubmit);
+            }
+            
+            if (locationForm) {
+                locationForm.addEventListener('submit', handleLocationSubmit);
+            }
+        }
+        
+        function logout() {
+            // Clear any stored authentication
+            localStorage.removeItem('adminToken');
+            // Redirect to main site
+            showMainSite();
+        }
+        
+        // File upload drag and drop
+        function setupFileUpload() {
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            
+            fileInputs.forEach(input => {
+                const label = input.nextElementSibling;
+                
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    label.addEventListener(eventName, preventDefaults, false);
+                });
+                
+                function preventDefaults(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    label.addEventListener(eventName, highlight, false);
+                });
+                
+                ['dragleave', 'drop'].forEach(eventName => {
+                    label.addEventListener(eventName, unhighlight, false);
+                });
+                
+                function highlight(e) {
+                    label.classList.add('dragover');
+                }
+                
+                function unhighlight(e) {
+                    label.classList.remove('dragover');
+                }
+                
+                label.addEventListener('drop', handleDrop, false);
+                
+                function handleDrop(e) {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    input.files = files;
+                    
+                    // Update label text
+                    if (files.length > 0) {
+                        const fileName = files[0].name;
+                        label.innerHTML = `<i class="fas fa-check-circle"></i><br>Selected: ${fileName}`;
+                    }
+                }
+            });
+            
+            // Handle file input change
+            fileInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const label = this.nextElementSibling;
+                    if (this.files.length > 0) {
+                        const fileName = this.files[0].name;
+                        label.innerHTML = `<i class="fas fa-check-circle"></i><br>Selected: ${fileName}`;
+                    }
+                });
+            });
+        }
+        
+        // Form submission handlers
+        function handleGallerySubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const submitBtn = event.target.querySelector('.upload-btn');
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span> Uploading...';
+            
+            // Simulate upload process
+            setTimeout(() => {
+                console.log('Gallery form submitted:', Object.fromEntries(formData));
+                showMessage('Gallery item uploaded successfully!', 'success');
+                event.target.reset();
+                
+                // Reset file upload labels
+                const fileLabels = event.target.querySelectorAll('.file-upload-label');
+                fileLabels.forEach(label => {
+                    label.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><br>Click to upload or drag and drop';
+                });
+                
+                loadGalleryImages();
+                
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Image';
+            }, 2000);
+        }
+        
+        function handleLocationSubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const submitBtn = event.target.querySelector('.upload-btn');
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading"></span> Adding...';
+            
+            // Simulate upload process
+            setTimeout(() => {
+                console.log('Location form submitted:', Object.fromEntries(formData));
+                showMessage('Location added successfully!', 'success');
+                event.target.reset();
+                
+                // Reset file upload labels
+                const fileLabels = event.target.querySelectorAll('.file-upload-label');
+                fileLabels.forEach(label => {
+                    label.innerHTML = '<i class="fas fa-cloud-upload-alt"></i><br>Click to upload or drag and drop';
+                });
+                
+                loadCurrentLocations();
+                
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-plus"></i> Upload Location';
+            }, 2000);
+        }
+        
+        function showAdminMessage(message, type) {
+            // Remove existing messages
+            const existingMessages = document.querySelectorAll('.message');
+            existingMessages.forEach(msg => msg.remove());
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            
+            const container = document.querySelector('.dashboard-container');
+            container.insertBefore(messageDiv, container.firstChild);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 5000);
+        }
+        
+        // Load data functions
+        function loadAdminGalleryImages() {
+            const galleryGrid = document.querySelector('#galleryGrid');
+            if (galleryGrid) {
+                galleryGrid.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Loading gallery images...</p>';
+                
+                // Simulate loading - in real implementation, this would fetch from Supabase
+                setTimeout(() => {
+                    galleryGrid.innerHTML = `
+                        <div style="text-align: center; color: #666; padding: 2rem;">
+                            <i class="fas fa-images" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            <p>No images uploaded yet.</p>
+                            <p>Use the form above to add your first gallery image.</p>
+                        </div>
+                    `;
+                }, 1000);
+            }
+        }
+        
+        function loadAdminLocations() {
+            const locationsGrid = document.querySelector('#currentLocations');
+            if (locationsGrid) {
+                locationsGrid.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">Loading locations...</p>';
+                
+                // Simulate loading - in real implementation, this would fetch from Supabase
+                setTimeout(() => {
+                    locationsGrid.innerHTML = `
+                        <div style="text-align: center; color: #666; padding: 2rem;">
+                            <i class="fas fa-map-marker-alt" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            <p>No locations added yet.</p>
+                            <p>Use the form above to add your first location.</p>
+                        </div>
+                    `;
+                }, 1000);
+            }
+        }
+        
+        function deleteAdminItem(id, type) {
+            if (confirm(`Are you sure you want to delete this ${type}?`)) {
+                console.log(`Deleting ${type} with id:`, id);
+                showAdminMessage(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully!`, 'success');
+                
+                if (type === 'image') {
+                    loadAdminGalleryImages();
+                } else {
+                    loadAdminLocations();
+                }
+            }
+        }
+        
+        // Initialize admin dashboard functionality
+        function initializeAdminDashboard() {
+            // Check if user is logged in
+            if (typeof adminAuth !== 'undefined' && !adminAuth.isLoggedIn()) {
+                alert('Please login to access admin dashboard');
+                showMainSite();
+                return;
+            }
+            
+            const uploadForm = document.getElementById('uploadForm');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const messageBox = document.getElementById('messageBox');
+            const galleryGrid = document.getElementById('galleryGrid');
+            const fileUploadLabel = document.getElementById('fileUploadLabel');
+            const imageFile = document.getElementById('imageFile');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const locationUploadForm = document.getElementById('locationUploadForm');
+            
+            // Logout functionality
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function() {
+                    if (typeof adminAuth !== 'undefined') {
+                        await adminAuth.logout();
+                    }
+                    showMainSite();
+                });
+            }
+            
+            // File upload drag and drop
+            if (fileUploadLabel) {
+                fileUploadLabel.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('dragover');
+                });
+                
+                fileUploadLabel.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                });
+                
+                fileUploadLabel.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        imageFile.files = files;
+                        updateFileLabel(files[0].name);
+                    }
+                });
+            }
+            
+            // File input change
+            if (imageFile) {
+                imageFile.addEventListener('change', function(e) {
+                    if (e.target.files.length > 0) {
+                        updateFileLabel(e.target.files[0].name);
+                    }
+                });
+            }
+            
+            // Gallery upload form
+            if (uploadForm) {
+                uploadForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    if (typeof galleryManager === 'undefined') {
+                        showMessage('Gallery manager not initialized', 'error');
+                        return;
+                    }
+                    
+                    const formData = new FormData(this);
+                    const file = imageFile.files[0];
+                    
+                    if (!file) {
+                        showMessage('Please select an image file', 'error');
+                        return;
+                    }
+                    
+                    uploadBtn.disabled = true;
+                    uploadBtn.innerHTML = '<div class="loading"></div> Uploading...';
+                    
+                    try {
+                        await galleryManager.uploadImage({
+                            title: formData.get('title'),
+                            location: formData.get('location'),
+                            description: formData.get('description'),
+                            file: file
+                        });
+                        
+                        showMessage('Image uploaded successfully!', 'success');
+                        uploadForm.reset();
+                        updateFileLabel('Click to upload or drag and drop');
+                        loadGalleryImages();
+                    } catch (error) {
+                        showMessage('Error uploading image: ' + error.message, 'error');
+                    } finally {
+                        uploadBtn.disabled = false;
+                        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Image';
+                    }
+                });
+            }
+            
+            // Location upload form
+            if (locationUploadForm) {
+                locationUploadForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    if (typeof locationManager === 'undefined') {
+                        showMessage('Location manager not initialized', 'error');
+                        return;
+                    }
+                    
+                    const formData = new FormData(this);
+                    const file = document.getElementById('locationImage').files[0];
+                    
+                    if (!file) {
+                        showMessage('Please select an image file', 'error');
+                        return;
+                    }
+                    
+                    try {
+                        await locationManager.uploadLocation({
+                            title: document.getElementById('locationTitle').value,
+                            address: document.getElementById('locationAddress').value,
+                            description: document.getElementById('locationDescription').value,
+                            file: file
+                        });
+                        
+                        showMessage('Location uploaded successfully!', 'success');
+                        locationUploadForm.reset();
+                        loadCurrentLocations();
+                    } catch (error) {
+                        showMessage('Error uploading location: ' + error.message, 'error');
+                    }
+                });
+            }
+            
+            // Load initial data
+            loadGalleryImages();
+        }
+        
+        function updateFileLabel(text) {
+            const label = document.getElementById('fileUploadLabel');
+            if (label) {
+                label.innerHTML = `<div><i class="fas fa-check" style="font-size: 2rem; color: #27ae60; margin-bottom: 1rem;"></i><p><strong>${text}</strong></p></div>`;
+            }
+        }
+        
+        function showMessage(message, type) {
+            const messageBox = document.getElementById('messageBox');
+            if (messageBox) {
+                messageBox.textContent = message;
+                messageBox.className = `message ${type}`;
+                messageBox.style.display = 'block';
+                
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        async function loadGalleryImages() {
+            if (typeof galleryManager === 'undefined') {
+                loadAdminGalleryImages();
+                return;
+            }
+            
+            try {
+                const images = await galleryManager.getImages();
+                const galleryGrid = document.getElementById('galleryGrid');
+                
+                if (galleryGrid) {
+                    galleryGrid.innerHTML = images.map(image => `
+                        <div class="gallery-admin-item">
+                            <img src="${image.image_url}" alt="${image.title}" loading="lazy">
+                            <div class="gallery-item-info">
+                                <div class="gallery-item-title">${image.title}</div>
+                                <div class="gallery-item-location">${image.location}</div>
+                                <div class="gallery-item-description">${image.description || ''}</div>
+                                <div class="gallery-item-actions">
+                                    <button class="delete-btn" onclick="deleteGalleryImage('${image.id}')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                showMessage('Error loading gallery images: ' + error.message, 'error');
+            }
+        }
+        
+        async function loadCurrentLocations() {
+            if (typeof locationManager === 'undefined') {
+                loadAdminLocations();
+                return;
+            }
+            
+            try {
+                const locations = await locationManager.getLocations();
+                const currentLocations = document.getElementById('currentLocations');
+                
+                if (currentLocations) {
+                    currentLocations.innerHTML = locations.map(location => `
+                        <div class="gallery-admin-item">
+                            <img src="${location.image_url}" alt="${location.title}" loading="lazy">
+                            <div class="gallery-item-info">
+                                <div class="gallery-item-title">${location.title}</div>
+                                <div class="gallery-item-location">${location.address}</div>
+                                <div class="gallery-item-description">${location.description || ''}</div>
+                                <div class="gallery-item-actions">
+                                    <button class="delete-btn" onclick="deleteLocation('${location.id}')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                showMessage('Error loading locations: ' + error.message, 'error');
+            }
+        }
+        
+        async function deleteGalleryImage(imageId) {
+            if (!confirm('Are you sure you want to delete this image?')) return;
+            
+            try {
+                await galleryManager.deleteImage(imageId);
+                showMessage('Image deleted successfully!', 'success');
+                loadGalleryImages();
+            } catch (error) {
+                showMessage('Error deleting image: ' + error.message, 'error');
+            }
+        }
+        
+        async function deleteLocation(locationId) {
+            if (!confirm('Are you sure you want to delete this location?')) return;
+            
+            try {
+                await locationManager.deleteLocation(locationId);
+                showMessage('Location deleted successfully!', 'success');
+                loadCurrentLocations();
+            } catch (error) {
+                showMessage('Error deleting location: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
