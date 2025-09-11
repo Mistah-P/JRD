@@ -4,19 +4,20 @@ const SUPABASE_URL = 'https://mprkjtpgvysisatrjzjm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wcmtqdHBndnlzaXNhdHJqemptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1ODMyNjQsImV4cCI6MjA3MzE1OTI2NH0.6jF7SsfY0B70XN4XR5FWS5b6_3mOgxnPTBO7nVOXYhg';
 
 // Initialize Supabase client
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Gallery Images Management
 class GalleryManager {
     constructor() {
-        this.bucketName = 'gallery-images';
-        this.tableName = 'gallery_installations';
+        this.bucketName = 'gallery';
+        this.tableName = 'gallery_images';
     }
 
     // Upload image to Supabase storage
     async uploadImage(file, fileName) {
         try {
-            const { data, error } = await supabase.storage
+            const { data, error } = await supabaseClient.storage
                 .from(this.bucketName)
                 .upload(fileName, file, {
                     cacheControl: '3600',
@@ -33,7 +34,7 @@ class GalleryManager {
 
     // Get public URL for uploaded image
     getImageUrl(fileName) {
-        const { data } = supabase.storage
+        const { data } = supabaseClient.storage
             .from(this.bucketName)
             .getPublicUrl(fileName);
         return data.publicUrl;
@@ -42,7 +43,7 @@ class GalleryManager {
     // Save image metadata to database
     async saveImageMetadata(imageData) {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from(this.tableName)
                 .insert([
                     {
@@ -65,7 +66,7 @@ class GalleryManager {
     // Get all gallery images
     async getAllImages() {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from(this.tableName)
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -82,14 +83,14 @@ class GalleryManager {
     async deleteImage(imageId, fileName) {
         try {
             // Delete from storage
-            const { error: storageError } = await supabase.storage
+            const { error: storageError } = await supabaseClient.storage
                 .from(this.bucketName)
                 .remove([fileName]);
 
             if (storageError) throw storageError;
 
             // Delete from database
-            const { error: dbError } = await supabase
+            const { error: dbError } = await supabaseClient
                 .from(this.tableName)
                 .delete()
                 .eq('id', imageId);
@@ -105,7 +106,7 @@ class GalleryManager {
     // Update image metadata
     async updateImageMetadata(imageId, updateData) {
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from(this.tableName)
                 .update(updateData)
                 .eq('id', imageId);
@@ -128,7 +129,7 @@ class AdminAuth {
     // Simple admin login (you can enhance this with proper authentication)
     async login(email, password) {
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: password
             });
@@ -151,7 +152,7 @@ class AdminAuth {
     // Logout
     async logout() {
         try {
-            const { error } = await supabase.auth.signOut();
+            const { error } = await supabaseClient.auth.signOut();
             if (error) throw error;
             localStorage.removeItem('isAdmin');
             return true;
@@ -169,7 +170,7 @@ class AdminAuth {
     // Get current session
     async getCurrentSession() {
         try {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             return session;
         } catch (error) {
             console.error('Session error:', error);
@@ -181,15 +182,16 @@ class AdminAuth {
 // Location Manager Class
 class LocationManager {
     constructor() {
-        this.supabase = supabase;
+        this.bucketName = 'locations';
+        this.tableName = 'locations';
     }
 
     async uploadLocation(file, title, address, description = '') {
         try {
             // Upload image to Supabase Storage
             const fileName = `location_${Date.now()}_${file.name}`;
-            const { data: uploadData, error: uploadError } = await this.supabase.storage
-                .from('locations')
+            const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                .from(this.bucketName)
                 .upload(fileName, file);
 
             if (uploadError) {
@@ -197,13 +199,13 @@ class LocationManager {
             }
 
             // Get public URL
-            const { data: urlData } = this.supabase.storage
-                .from('locations')
+            const { data: urlData } = supabaseClient.storage
+                .from(this.bucketName)
                 .getPublicUrl(fileName);
 
             // Save location data to database
-            const { data, error } = await this.supabase
-                .from('locations')
+            const { data, error } = await supabaseClient
+                .from(this.tableName)
                 .insert([
                     {
                         title: title,
@@ -226,8 +228,8 @@ class LocationManager {
 
     async getAllLocations() {
         try {
-            const { data, error } = await this.supabase
-                .from('locations')
+            const { data, error } = await supabaseClient
+                .from(this.tableName)
                 .select('*')
                 .order('created_at', { ascending: false });
 
@@ -244,8 +246,8 @@ class LocationManager {
 
     async deleteLocation(locationId) {
         try {
-            const { error } = await this.supabase
-                .from('locations')
+            const { error } = await supabaseClient
+                .from(this.tableName)
                 .delete()
                 .eq('id', locationId);
 
@@ -270,4 +272,4 @@ const adminAuth = new AdminAuth();
 window.galleryManager = galleryManager;
 window.locationManager = locationManager;
 window.adminAuth = adminAuth;
-window.supabase = supabase;
+window.supabase = supabaseClient;
