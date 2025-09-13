@@ -459,3 +459,489 @@ document.addEventListener('keydown', function(event) {
         closeContactPopup();
     }
 });
+// ===
+== ADMIN FUNCTIONALITY =====
+
+// Admin Dashboard Functions
+function showAdminDashboard() {
+    document.getElementById('main-website').style.display = 'none';
+    document.getElementById('admin-dashboard').style.display = 'block';
+    document.body.style.overflow = 'auto';
+    
+    // Update URL hash
+    window.location.hash = 'admin';
+    
+    // Initialize admin functionality
+    initializeAdmin();
+}
+
+function showMainSite() {
+    document.getElementById('admin-dashboard').style.display = 'none';
+    document.getElementById('main-website').style.display = 'block';
+    document.body.style.overflow = 'auto';
+    
+    // Update URL hash
+    window.location.hash = '';
+}
+
+// Hash-based routing
+function handleHashChange() {
+    const hash = window.location.hash.substring(1); // Remove the '#'
+    
+    if (hash === 'admin') {
+        showAdminDashboard();
+    } else {
+        showMainSite();
+    }
+}
+
+// Listen for hash changes
+window.addEventListener('hashchange', handleHashChange);
+
+// Check hash on page load
+document.addEventListener('DOMContentLoaded', () => {
+    handleHashChange();
+});
+
+// Admin Section Management
+function showSection(sectionName) {
+    // Hide all sections
+    document.getElementById('gallery-section').style.display = 'none';
+    document.getElementById('location-section').style.display = 'none';
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    // Show selected section and activate tab
+    if (sectionName === 'gallery') {
+        document.getElementById('gallery-section').style.display = 'block';
+        document.querySelector('[onclick="showSection(\'gallery\')"]').classList.add('active');
+    } else if (sectionName === 'location') {
+        document.getElementById('location-section').style.display = 'block';
+        document.querySelector('[onclick="showSection(\'location\')"]').classList.add('active');
+    }
+}
+
+// Initialize Admin Dashboard
+function initializeAdmin() {
+    // Initialize Supabase if not already done
+    if (typeof supabaseClient === 'undefined') {
+        initializeSupabase();
+    }
+    
+    // Load existing gallery images
+    loadAdminGalleryImages();
+    
+    // Setup form handlers
+    setupAdminFormHandlers();
+    
+    // Setup file upload handlers
+    setupFileUploadHandlers();
+}
+
+// Supabase Configuration
+let supabaseClient;
+let galleryManager;
+let locationManager;
+
+function initializeSupabase() {
+    // Replace with your actual Supabase URL and anon key
+    // Example: const SUPABASE_URL = 'https://your-project.supabase.co';
+    // Example: const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    
+    try {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Initialize managers
+        galleryManager = new GalleryManager(supabaseClient);
+        locationManager = new LocationManager(supabaseClient);
+        
+        console.log('Supabase initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize Supabase:', error);
+        showMessage('Please configure Supabase credentials in script.js', 'error');
+    }
+}
+
+// Gallery Manager Class
+class GalleryManager {
+    constructor(supabaseClient) {
+        this.supabase = supabaseClient;
+        this.tableName = 'gallery_images';
+        this.bucketName = 'gallery';
+    }
+    
+    async uploadImage(file, title, location, description) {
+        try {
+            // Upload file to Supabase Storage
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            
+            const { data: uploadData, error: uploadError } = await this.supabase.storage
+                .from(this.bucketName)
+                .upload(fileName, file);
+            
+            if (uploadError) throw uploadError;
+            
+            // Get public URL
+            const { data: urlData } = this.supabase.storage
+                .from(this.bucketName)
+                .getPublicUrl(fileName);
+            
+            // Save metadata to database
+            const { data, error } = await this.supabase
+                .from(this.tableName)
+                .insert([
+                    {
+                        title,
+                        location,
+                        description,
+                        image_url: urlData.publicUrl,
+                        file_name: fileName,
+                        created_at: new Date().toISOString()
+                    }
+                ])
+                .select();
+            
+            if (error) throw error;
+            
+            return data[0];
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            throw error;
+        }
+    }
+    
+    async getAllImages() {
+        try {
+            const { data, error } = await this.supabase
+                .from(this.tableName)
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            return data;
+        } catch (error) {
+            console.error('Error fetching images:', error);
+            throw error;
+        }
+    }
+    
+    async deleteImage(id, fileName) {
+        try {
+            // Delete from storage
+            const { error: storageError } = await this.supabase.storage
+                .from(this.bucketName)
+                .remove([fileName]);
+            
+            if (storageError) throw storageError;
+            
+            // Delete from database
+            const { error: dbError } = await this.supabase
+                .from(this.tableName)
+                .delete()
+                .eq('id', id);
+            
+            if (dbError) throw dbError;
+            
+            return true;
+        } catch (error) {
+            console.error('Error deleting image:', error);
+            throw error;
+        }
+    }
+}
+
+// Location Manager Class
+class LocationManager {
+    constructor(supabaseClient) {
+        this.supabase = supabaseClient;
+        this.tableName = 'locations';
+        this.bucketName = 'locations';
+    }
+    
+    async uploadLocation(file, title, address, description) {
+        try {
+            // Upload file to Supabase Storage
+            const fileExt = file.name.split('.').pop();
+            const fileName = `location-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            
+            const { data: uploadData, error: uploadError } = await this.supabase.storage
+                .from(this.bucketName)
+                .upload(fileName, file);
+            
+            if (uploadError) throw uploadError;
+            
+            // Get public URL
+            const { data: urlData } = this.supabase.storage
+                .from(this.bucketName)
+                .getPublicUrl(fileName);
+            
+            // Save metadata to database
+            const { data, error } = await this.supabase
+                .from(this.tableName)
+                .insert([
+                    {
+                        title,
+                        address,
+                        description,
+                        image_url: urlData.publicUrl,
+                        file_name: fileName,
+                        created_at: new Date().toISOString()
+                    }
+                ])
+                .select();
+            
+            if (error) throw error;
+            
+            return data[0];
+        } catch (error) {
+            console.error('Error uploading location:', error);
+            throw error;
+        }
+    }
+    
+    async getAllLocations() {
+        try {
+            const { data, error } = await this.supabase
+                .from(this.tableName)
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            return data;
+        } catch (error) {
+            console.error('Error fetching locations:', error);
+            throw error;
+        }
+    }
+}
+
+// Admin Form Handlers
+function setupAdminFormHandlers() {
+    // Gallery upload form
+    const uploadForm = document.getElementById('uploadForm');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', handleGalleryUpload);
+    }
+    
+    // Location upload form
+    const locationForm = document.getElementById('locationUploadForm');
+    if (locationForm) {
+        locationForm.addEventListener('submit', handleLocationUpload);
+    }
+}
+
+// File Upload Handlers
+function setupFileUploadHandlers() {
+    const fileInput = document.getElementById('imageFile');
+    const fileLabel = document.getElementById('fileUploadLabel');
+    
+    if (fileInput && fileLabel) {
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileLabel.innerHTML = `
+                    <div>
+                        <i class="fas fa-check-circle" style="font-size: 2rem; color: #27ae60; margin-bottom: 1rem;"></i>
+                        <p><strong>File selected:</strong> ${file.name}</p>
+                        <p style="color: #666; font-size: 0.9rem;">Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                `;
+            }
+        });
+        
+        // Drag and drop functionality
+        fileLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = '#e74c3c';
+            fileLabel.style.backgroundColor = '#fff5f5';
+        });
+        
+        fileLabel.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = '#ddd';
+            fileLabel.style.backgroundColor = '#f9f9f9';
+        });
+        
+        fileLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileLabel.style.borderColor = '#ddd';
+            fileLabel.style.backgroundColor = '#f9f9f9';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+}
+
+// Handle Gallery Upload
+async function handleGalleryUpload(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const uploadBtn = document.getElementById('uploadBtn');
+    
+    // Get form values
+    const title = formData.get('title');
+    const location = formData.get('location');
+    const description = formData.get('description');
+    const imageFile = formData.get('image');
+    
+    if (!imageFile || !title || !location) {
+        showMessage('Please fill in all required fields and select an image.', 'error');
+        return;
+    }
+    
+    // Show loading state
+    const originalText = uploadBtn.innerHTML;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+    uploadBtn.disabled = true;
+    
+    try {
+        // Upload to Supabase
+        await galleryManager.uploadImage(imageFile, title, location, description);
+        
+        showMessage('Image uploaded successfully!', 'success');
+        
+        // Reset form
+        form.reset();
+        document.getElementById('fileUploadLabel').innerHTML = `
+            <div>
+                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #e74c3c; margin-bottom: 1rem;"></i>
+                <p><strong>Click to upload</strong> or drag and drop</p>
+                <p style="color: #666; font-size: 0.9rem;">PNG, JPG, GIF up to 10MB</p>
+            </div>
+        `;
+        
+        // Reload gallery images
+        loadAdminGalleryImages();
+        
+        // Update main site gallery
+        loadGalleryImages();
+        
+    } catch (error) {
+        showMessage('Error uploading image: ' + error.message, 'error');
+    } finally {
+        // Reset button
+        uploadBtn.innerHTML = originalText;
+        uploadBtn.disabled = false;
+    }
+}
+
+// Handle Location Upload
+async function handleLocationUpload(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const title = document.getElementById('locationTitle').value;
+    const address = document.getElementById('locationAddress').value;
+    const description = document.getElementById('locationDescription').value;
+    const imageFile = document.getElementById('locationImage').files[0];
+    
+    if (!imageFile || !title || !address) {
+        showMessage('Please fill in all required fields and select an image.', 'error');
+        return;
+    }
+    
+    try {
+        await locationManager.uploadLocation(imageFile, title, address, description);
+        
+        showMessage('Location uploaded successfully!', 'success');
+        form.reset();
+        
+        // Update main site locations
+        loadLocations();
+        
+    } catch (error) {
+        showMessage('Error uploading location: ' + error.message, 'error');
+    }
+}
+
+// Load Admin Gallery Images
+async function loadAdminGalleryImages() {
+    try {
+        if (!galleryManager) return;
+        
+        const images = await galleryManager.getAllImages();
+        const galleryGrid = document.getElementById('galleryGrid');
+        
+        if (!galleryGrid) return;
+        
+        galleryGrid.innerHTML = '';
+        
+        images.forEach(image => {
+            const imageCard = document.createElement('div');
+            imageCard.className = 'admin-image-card';
+            imageCard.innerHTML = `
+                <div class="admin-image">
+                    <img src="${image.image_url}" alt="${image.title}" loading="lazy">
+                </div>
+                <div class="admin-image-info">
+                    <h4>${image.title}</h4>
+                    <p>${image.location}</p>
+                    ${image.description ? `<p style="font-size: 0.9rem; opacity: 0.8;">${image.description}</p>` : ''}
+                    <button class="delete-btn" onclick="deleteGalleryImage(${image.id}, '${image.file_name}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            `;
+            galleryGrid.appendChild(imageCard);
+        });
+        
+    } catch (error) {
+        console.error('Error loading admin gallery images:', error);
+    }
+}
+
+// Delete Gallery Image
+async function deleteGalleryImage(id, fileName) {
+    if (!confirm('Are you sure you want to delete this image?')) {
+        return;
+    }
+    
+    try {
+        await galleryManager.deleteImage(id, fileName);
+        showMessage('Image deleted successfully!', 'success');
+        
+        // Reload gallery
+        loadAdminGalleryImages();
+        loadGalleryImages();
+        
+    } catch (error) {
+        showMessage('Error deleting image: ' + error.message, 'error');
+    }
+}
+
+// Show Message Function
+function showMessage(message, type = 'info') {
+    const messageBox = document.getElementById('messageBox');
+    if (!messageBox) return;
+    
+    messageBox.className = `message ${type}`;
+    messageBox.textContent = message;
+    messageBox.style.display = 'block';
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        messageBox.style.display = 'none';
+    }, 5000);
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if we should show admin on load
+    if (window.location.hash === '#admin') {
+        showAdminDashboard();
+    }
+});

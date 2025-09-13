@@ -1,155 +1,119 @@
--- Fire Safety Website Database Setup for Supabase
+-- JRD Fire Safety Database Setup for Supabase
 -- Run these commands in your Supabase SQL Editor
 
--- =============================================
--- 1. CREATE TABLES
--- =============================================
+-- Enable Row Level Security
+ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret';
 
--- Gallery Images Table
-CREATE TABLE IF NOT EXISTS gallery_images (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    title TEXT NOT NULL,
-    location TEXT NOT NULL,
+-- Create gallery_images table
+CREATE TABLE IF NOT EXISTS public.gallery_images (
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL,
     description TEXT,
     image_url TEXT NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Locations Table
-CREATE TABLE IF NOT EXISTS locations (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    title TEXT NOT NULL,
+-- Create locations table
+CREATE TABLE IF NOT EXISTS public.locations (
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
     address TEXT NOT NULL,
     description TEXT,
     image_url TEXT NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Admin Users Table (for authentication)
-CREATE TABLE IF NOT EXISTS admin_users (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    name TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    last_login TIMESTAMP WITH TIME ZONE
-);
-
--- =============================================
--- 2. CREATE STORAGE BUCKETS
--- =============================================
-
--- Create storage bucket for gallery images
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('gallery', 'gallery', true)
+-- Create storage buckets
+INSERT INTO storage.buckets (id, name, public) 
+VALUES 
+    ('gallery', 'gallery', true),
+    ('locations', 'locations', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Create storage bucket for location images
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('locations', 'locations', true)
-ON CONFLICT (id) DO NOTHING;
+-- Set up Row Level Security policies for gallery_images
+ALTER TABLE public.gallery_images ENABLE ROW LEVEL SECURITY;
 
--- =============================================
--- 3. SET UP ROW LEVEL SECURITY (RLS)
--- =============================================
-
--- Enable RLS on all tables
-ALTER TABLE gallery_images ENABLE ROW LEVEL SECURITY;
-ALTER TABLE locations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
-
--- =============================================
--- 4. CREATE POLICIES
--- =============================================
-
--- Gallery Images Policies
--- Allow public read access
-CREATE POLICY "Allow public read access on gallery_images" ON gallery_images
+-- Allow public read access to gallery_images
+CREATE POLICY "Public read access for gallery_images" ON public.gallery_images
     FOR SELECT USING (true);
 
--- Allow authenticated users to insert/update/delete
-CREATE POLICY "Allow authenticated insert on gallery_images" ON gallery_images
-    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+-- Allow public insert access to gallery_images (you may want to restrict this)
+CREATE POLICY "Public insert access for gallery_images" ON public.gallery_images
+    FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Allow authenticated update on gallery_images" ON gallery_images
-    FOR UPDATE USING (auth.role() = 'authenticated');
+-- Allow public update access to gallery_images (you may want to restrict this)
+CREATE POLICY "Public update access for gallery_images" ON public.gallery_images
+    FOR UPDATE USING (true);
 
-CREATE POLICY "Allow authenticated delete on gallery_images" ON gallery_images
-    FOR DELETE USING (auth.role() = 'authenticated');
+-- Allow public delete access to gallery_images (you may want to restrict this)
+CREATE POLICY "Public delete access for gallery_images" ON public.gallery_images
+    FOR DELETE USING (true);
 
--- Locations Policies
--- Allow public read access
-CREATE POLICY "Allow public read access on locations" ON locations
+-- Set up Row Level Security policies for locations
+ALTER TABLE public.locations ENABLE ROW LEVEL SECURITY;
+
+-- Allow public read access to locations
+CREATE POLICY "Public read access for locations" ON public.locations
     FOR SELECT USING (true);
 
--- Allow authenticated users to insert/update/delete
-CREATE POLICY "Allow authenticated insert on locations" ON locations
-    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+-- Allow public insert access to locations (you may want to restrict this)
+CREATE POLICY "Public insert access for locations" ON public.locations
+    FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Allow authenticated update on locations" ON locations
-    FOR UPDATE USING (auth.role() = 'authenticated');
+-- Allow public update access to locations (you may want to restrict this)
+CREATE POLICY "Public update access for locations" ON public.locations
+    FOR UPDATE USING (true);
 
-CREATE POLICY "Allow authenticated delete on locations" ON locations
-    FOR DELETE USING (auth.role() = 'authenticated');
+-- Allow public delete access to locations (you may want to restrict this)
+CREATE POLICY "Public delete access for locations" ON public.locations
+    FOR DELETE USING (true);
 
--- Admin Users Policies
--- Only allow authenticated users to read their own data
-CREATE POLICY "Users can read own data" ON admin_users
-    FOR SELECT USING (auth.uid() = id);
-
--- =============================================
--- 5. STORAGE POLICIES
--- =============================================
-
--- Gallery bucket policies
-CREATE POLICY "Allow public read access on gallery bucket" ON storage.objects
+-- Set up storage policies for gallery bucket
+CREATE POLICY "Public read access for gallery bucket" ON storage.objects
     FOR SELECT USING (bucket_id = 'gallery');
 
-CREATE POLICY "Allow authenticated upload to gallery bucket" ON storage.objects
-    FOR INSERT WITH CHECK (bucket_id = 'gallery' AND auth.role() = 'authenticated');
+CREATE POLICY "Public insert access for gallery bucket" ON storage.objects
+    FOR INSERT WITH CHECK (bucket_id = 'gallery');
 
-CREATE POLICY "Allow authenticated delete from gallery bucket" ON storage.objects
-    FOR DELETE USING (bucket_id = 'gallery' AND auth.role() = 'authenticated');
+CREATE POLICY "Public update access for gallery bucket" ON storage.objects
+    FOR UPDATE USING (bucket_id = 'gallery');
 
--- Locations bucket policies
-CREATE POLICY "Allow public read access on locations bucket" ON storage.objects
+CREATE POLICY "Public delete access for gallery bucket" ON storage.objects
+    FOR DELETE USING (bucket_id = 'gallery');
+
+-- Set up storage policies for locations bucket
+CREATE POLICY "Public read access for locations bucket" ON storage.objects
     FOR SELECT USING (bucket_id = 'locations');
 
-CREATE POLICY "Allow authenticated upload to locations bucket" ON storage.objects
-    FOR INSERT WITH CHECK (bucket_id = 'locations' AND auth.role() = 'authenticated');
+CREATE POLICY "Public insert access for locations bucket" ON storage.objects
+    FOR INSERT WITH CHECK (bucket_id = 'locations');
 
-CREATE POLICY "Allow authenticated delete from locations bucket" ON storage.objects
-    FOR DELETE USING (bucket_id = 'locations' AND auth.role() = 'authenticated');
+CREATE POLICY "Public update access for locations bucket" ON storage.objects
+    FOR UPDATE USING (bucket_id = 'locations');
 
--- =============================================
--- 6. CREATE INDEXES FOR PERFORMANCE
--- =============================================
+CREATE POLICY "Public delete access for locations bucket" ON storage.objects
+    FOR DELETE USING (bucket_id = 'locations');
 
-CREATE INDEX IF NOT EXISTS idx_gallery_images_created_at ON gallery_images(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_locations_created_at ON locations(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_admin_users_email ON admin_users(email);
+-- Insert some sample data (optional)
+INSERT INTO public.gallery_images (title, location, description, image_url, file_name) VALUES
+    ('Corporate Office Complex', '50+ ABC Extinguishers Installed', 'Complete fire safety installation for a 10-story office building', 'https://via.placeholder.com/800x600/e74c3c/ffffff?text=Office+Complex', 'sample-office.jpg'),
+    ('Manufacturing Plant', 'Complete Fire Suppression System', 'Industrial-grade fire suppression system with foam and CO2 units', 'https://via.placeholder.com/800x600/f39c12/ffffff?text=Manufacturing+Plant', 'sample-manufacturing.jpg'),
+    ('Logistics Warehouse', 'High-Capacity Foam Systems', 'Large-scale warehouse protection with automated foam systems', 'https://via.placeholder.com/800x600/27ae60/ffffff?text=Warehouse', 'sample-warehouse.jpg');
 
--- =============================================
--- 7. CREATE SAMPLE ADMIN USER
--- =============================================
+INSERT INTO public.locations (title, address, description, image_url, file_name) VALUES
+    ('Main Branch', '123 Fire Safety Boulevard, Safety City, SC 12345', 'Our main headquarters with full showroom and service center', 'https://via.placeholder.com/600x400/e74c3c/ffffff?text=Main+Branch', 'main-branch.jpg'),
+    ('North Branch', '456 Safety Avenue, North District, ND 67890', 'Specialized in commercial fire safety solutions', 'https://via.placeholder.com/600x400/f39c12/ffffff?text=North+Branch', 'north-branch.jpg');
 
--- Insert a sample admin user (password: admin123)
--- Note: In production, use a strong password and proper hashing
-INSERT INTO admin_users (email, password_hash, name)
-VALUES (
-    'admin@firesafety.com',
-    '$2b$10$rOzJqQqQqQqQqQqQqQqQqOzJqQqQqQqQqQqQqQqQqOzJqQqQqQqQq', -- This is a placeholder hash
-    'Admin User'
-)
-ON CONFLICT (email) DO NOTHING;
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_gallery_images_created_at ON public.gallery_images(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_locations_created_at ON public.locations(created_at DESC);
 
--- =============================================
--- 8. CREATE FUNCTIONS (OPTIONAL)
--- =============================================
-
--- Function to update updated_at timestamp
+-- Create updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -159,35 +123,14 @@ END;
 $$ language 'plpgsql';
 
 -- Create triggers for updated_at
-CREATE TRIGGER update_gallery_images_updated_at
-    BEFORE UPDATE ON gallery_images
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_gallery_images_updated_at BEFORE UPDATE ON public.gallery_images
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_locations_updated_at
-    BEFORE UPDATE ON locations
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_locations_updated_at BEFORE UPDATE ON public.locations
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- =============================================
--- SETUP COMPLETE!
--- =============================================
-
--- Your database is now ready for the Fire Safety website.
--- Make sure to:
--- 1. Update your Supabase credentials in supabase-config.js
--- 2. Create a proper admin user with a secure password
--- 3. Test the upload functionality
-
--- Sample data (optional - remove in production)
-INSERT INTO gallery_images (title, location, description, image_url)
-VALUES 
-    ('Fire Extinguisher Installation', 'ABC Corporation Office', 'Complete fire safety system installation', 'https://via.placeholder.com/600x400/ff6b35/ffffff?text=Fire+Safety+1'),
-    ('Smoke Detector Setup', 'XYZ Restaurant', 'Advanced smoke detection system', 'https://via.placeholder.com/600x400/ff6b35/ffffff?text=Fire+Safety+2')
-ON CONFLICT DO NOTHING;
-
-INSERT INTO locations (title, address, description, image_url)
-VALUES 
-    ('Main Branch', '123 Fire Safety Street, City Center', 'Our main headquarters with full showroom and service center', 'https://via.placeholder.com/600x400/ff6b35/ffffff?text=Main+Branch'),
-    ('North Branch', '456 Safety Avenue, North District', 'Specialized in commercial fire safety solutions', 'https://via.placeholder.com/600x400/ff6b35/ffffff?text=North+Branch')
-ON CONFLICT DO NOTHING;
+-- Grant necessary permissions
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT ALL ON public.gallery_images TO anon, authenticated;
+GRANT ALL ON public.locations TO anon, authenticated;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
