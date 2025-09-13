@@ -460,7 +460,7 @@ document.addEventListener('keydown', function(event) {
     }
 });
 // ===
-== ADMIN FUNCTIONALITY =====
+
 
 // Admin Dashboard Functions
 function showAdminDashboard() {
@@ -922,6 +922,44 @@ async function deleteGalleryImage(id, fileName) {
         showMessage('Error deleting image: ' + error.message, 'error');
     }
 }
+
+// Show Message Function
+function showMessage(message, type = 'info') {
+    const messageBox = document.getElementById('messageBox');
+    if (!messageBox) return;
+    
+    messageBox.className = `message ${type}`;
+    messageBox.textContent = message;
+    messageBox.style.display = 'block';
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        messageBox.style.display = 'none';
+    }, 5000);
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if we should show admin on load
+    if (window.location.hash === '#admin') {
+        showAdminDashboard();
+    }
+});        
+return;
+    
+    
+    try {
+        await galleryManager.deleteImage(id, fileName);
+        showMessage('Image deleted successfully!', 'success');
+        
+        // Reload gallery
+        loadAdminGalleryImages();
+        loadGalleryImages();
+        
+    } catch (error) {
+        showMessage('Error deleting image: ' + error.message, 'error');
+    }
+
 
 // Show Message Function
 function showMessage(message, type = 'info') {
